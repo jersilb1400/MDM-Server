@@ -1,0 +1,44 @@
+# Render Blueprint for MDM Server
+# Deploy with: render blueprint apply
+#
+# Current Render URL: https://mdm-server-ajov.onrender.com
+# Custom domain (pending): mdm.gracefm.org
+
+services:
+  - type: web
+    name: mdm-server
+    runtime: node
+    region: oregon  # or your preferred region
+    plan: starter   # $7/month, or use 'free' for testing
+    
+    # Build settings
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Custom domain - add mdm.gracefm.org in Render dashboard
+    # DNS: CNAME mdm -> mdm-server-ajov.onrender.com
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8443
+      - key: ORG_NAME
+        value: Grace Fellowship
+      - key: MDM_SERVER_URL
+        value: https://mdm.gracefm.org
+      - key: APNS_TOPIC
+        sync: false  # Set this after getting your Apple Push Certificate
+      - key: ALLOWED_ORIGINS
+        value: "*"  # Or restrict to specific origins
+
+    # Auto-deploy on push
+    autoDeploy: true
+    
+    # Branch to deploy from
+    branch: main
