@@ -483,6 +483,165 @@ app.post('/api/devices/:udid/lock', (req: Request, res: Response) => {
 });
 
 // ============================================================================
+// Agent Reporting API (Lightweight device agent reports)
+// ============================================================================
+
+interface AgentReport {
+  reportId: string;
+  reportedAt: string;
+  organizationId: string;
+  serialNumber: string;
+  hardwareUUID: string;
+  deviceName: string;
+  modelName: string;
+  modelIdentifier: string;
+  chipType: string;
+  processorName: string;
+  processorCores: number;
+  memorySize: string;
+  memorySizeBytes: number;
+  storageTotalGB: number;
+  storageAvailableGB: number;
+  storageType: string;
+  displayInfo: string;
+  osName: string;
+  osVersion: string;
+  osBuild: string;
+  osInstallDate?: string;
+  lastBootTime?: string;
+  ipAddress?: string;
+  macAddress?: string;
+  wifiMacAddress?: string;
+  hostname: string;
+  batteryLevel?: number;
+  batteryHealth?: string;
+  batteryChargingStatus?: string;
+  firewallEnabled?: boolean;
+  filevaultEnabled?: boolean;
+  sipEnabled?: boolean;
+  gatekeeperEnabled?: boolean;
+  currentUser: string;
+  lastLoginTime?: string;
+}
+
+// Store agent reports (keyed by serial number)
+const agentReports = new Map<string, AgentReport & { lastReportedAt: Date }>();
+
+// Receive agent report
+app.post('/api/agent/report', (req: Request, res: Response) => {
+  try {
+    const report = req.body as AgentReport;
+    
+    if (!report.serialNumber || !report.hardwareUUID) {
+      res.status(400).json({ error: 'Missing required fields: serialNumber or hardwareUUID' });
+      return;
+    }
+    
+    // Store the report
+    agentReports.set(report.serialNumber, {
+      ...report,
+      lastReportedAt: new Date(),
+    });
+    
+    console.log(`[Agent] Report received from ${report.deviceName} (${report.serialNumber})`);
+    console.log(`        Model: ${report.modelName} | OS: ${report.osName} ${report.osVersion}`);
+    console.log(`        IP: ${report.ipAddress || 'N/A'} | User: ${report.currentUser}`);
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'Report received',
+      reportId: report.reportId,
+    });
+  } catch (err) {
+    console.error('Agent report error:', err);
+    res.status(500).json({ error: 'Failed to process report' });
+  }
+});
+
+// Get all agent reports
+app.get('/api/agent/reports', (_req: Request, res: Response) => {
+  const reports = Array.from(agentReports.values());
+  res.json(reports);
+});
+
+// Get agent report by serial number
+app.get('/api/agent/reports/:serialNumber', (req: Request, res: Response) => {
+  const report = agentReports.get(req.params.serialNumber);
+  if (report) {
+    res.json(report);
+  } else {
+    res.status(404).json({ error: 'Report not found' });
+  }
+});
+
+// Serve the agent Swift file for download
+app.get('/agent/GraceFMAgent.swift', (_req: Request, res: Response) => {
+  const agentCode = `// Download from: https://mdm.gracefm.org/agent/GraceFMAgent.swift
+// See installation instructions at: https://mdm.gracefm.org/agent/install
+// This endpoint serves the actual agent code from the repository
+`;
+  res.type('text/plain').send(agentCode);
+});
+
+// Agent installation instructions page
+app.get('/agent/install', (_req: Request, res: Response) => {
+  const html = \`<!DOCTYPE html>
+<html>
+<head>
+  <title>Grace Fellowship Device Agent</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f5f5f7; }
+    .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h1 { color: #1d1d1f; }
+    h2 { color: #424245; margin-top: 0; }
+    code { background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono', Monaco, monospace; }
+    pre { background: #1d1d1f; color: #fff; padding: 20px; border-radius: 8px; overflow-x: auto; }
+    .btn { display: inline-block; background: #0071e3; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-right: 10px; }
+    .btn:hover { background: #0077ed; }
+    .btn-secondary { background: #424245; }
+    .steps { counter-reset: step; }
+    .steps li { counter-increment: step; margin-bottom: 15px; }
+    .steps li::marker { content: counter(step) ". "; font-weight: bold; color: #0071e3; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🖥️ Grace Fellowship Device Agent</h1>
+    <p>A lightweight agent that reports device information to the Network Inventory Scanner.</p>
+    <a href="/agent/GraceFMAgent.swift" class="btn" download>Download Agent</a>
+    <a href="https://github.com/jersilb1400/MDM-Server" class="btn btn-secondary">View on GitHub</a>
+  </div>
+  
+  <div class="card">
+    <h2>Quick Install (macOS)</h2>
+    <p>Open Terminal and run:</p>
+    <pre>curl -sSL https://mdm.gracefm.org/agent/GraceFMAgent.swift -o GraceFMAgent.swift
+swift GraceFMAgent.swift</pre>
+  </div>
+  
+  <div class="card">
+    <h2>Manual Installation</h2>
+    <ol class="steps">
+      <li>Download <code>GraceFMAgent.swift</code> using the button above</li>
+      <li>Open Terminal and navigate to the download folder</li>
+      <li>Run: <code>swift GraceFMAgent.swift</code></li>
+      <li>Or compile for faster execution: <code>swiftc -O -o GraceFMAgent GraceFMAgent.swift && ./GraceFMAgent</code></li>
+    </ol>
+  </div>
+  
+  <div class="card">
+    <h2>Options</h2>
+    <ul>
+      <li><code>--local</code> - Run locally without sending to server (useful for testing)</li>
+    </ul>
+    <pre>swift GraceFMAgent.swift --local</pre>
+  </div>
+</body>
+</html>\`;
+  res.type('text/html').send(html);
+});
+
+// ============================================================================
 // Error Handler
 // ============================================================================
 
