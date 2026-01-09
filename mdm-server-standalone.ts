@@ -495,6 +495,7 @@ interface AgentReport {
   deviceName: string;
   modelName: string;
   modelIdentifier: string;
+  marketingModelName?: string;  // Human-friendly model name like "MacBook Pro 14-inch (M4 Pro, 2024)"
   chipType: string;
   processorName: string;
   processorCores: number;
