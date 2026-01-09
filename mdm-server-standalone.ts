@@ -583,6 +583,23 @@ app.get('/agent/GraceFMAgent.swift', (_req: Request, res: Response) => {
   res.type('text/plain').send(agentCode);
 });
 
+// Agent version check endpoint (for auto-updates)
+app.get('/api/agent/version', (_req: Request, res: Response) => {
+  res.json({
+    version: '1.0.0',
+    buildNumber: 1,
+    downloadUrl: 'https://mdm.gracefm.org/agent/download',
+    releaseNotes: 'Initial release with device reporting capabilities.',
+    mandatory: false,
+  });
+});
+
+// Agent download endpoint
+app.get('/agent/download', (_req: Request, res: Response) => {
+  // Redirect to the latest DMG download
+  res.redirect('https://github.com/jersilb1400/MDM-Server/releases/latest/download/GraceFMAgent-Installer.dmg');
+});
+
 // Agent installation instructions page
 app.get('/agent/install', (_req: Request, res: Response) => {
   const html = '<!DOCTYPE html>' +
