@@ -506,6 +506,7 @@ interface AgentReport {
   storageType: string;
   displayInfo: string;
   osName: string;
+  osMarketingName?: string;  // e.g., "Sequoia", "Sonoma", "Ventura"
   osVersion: string;
   osBuild: string;
   osInstallDate?: string;
@@ -521,8 +522,26 @@ interface AgentReport {
   filevaultEnabled?: boolean;
   sipEnabled?: boolean;
   gatekeeperEnabled?: boolean;
+  activationLockEnabled?: boolean;
   currentUser: string;
   lastLoginTime?: string;
+  // Hardware details
+  modelNumber?: string;  // Apple part number like "MX2Y3LL/A"
+  // Warranty/Support info
+  activationDate?: string;
+  warrantyStatus?: string;
+  estimatedWarrantyExpiry?: string;
+  appleCareEligible?: boolean;
+  coverageCheckUrl?: string;
+  // Software inventory
+  installedApps?: Array<{
+    name: string;
+    version: string;
+    bundleId: string;
+    path: string;
+    lastModified: string;
+  }>;
+  appCount?: number;
 }
 
 // Store agent reports (keyed by serial number)
