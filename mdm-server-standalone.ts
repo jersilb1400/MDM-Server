@@ -619,6 +619,14 @@ const AGENT_VERSIONS = {
     releaseNotes: 'Initial Windows release with full device reporting.',
     mandatory: false,
     minOsVersion: '10.0',
+  },
+  ios: {
+    version: '1.0.0',
+    buildNumber: 1,
+    downloadUrl: 'https://mdm.gracefm.org/agent/download/ios',
+    releaseNotes: 'Initial iOS/iPadOS release with device reporting.',
+    mandatory: false,
+    minOsVersion: '15.0',
   }
 };
 
@@ -639,6 +647,7 @@ app.get('/api/agent/version', (req: Request, res: Response) => {
     platforms: {
       macos: { version: AGENT_VERSIONS.macos.version, buildNumber: AGENT_VERSIONS.macos.buildNumber },
       windows: { version: AGENT_VERSIONS.windows.version, buildNumber: AGENT_VERSIONS.windows.buildNumber },
+      ios: { version: AGENT_VERSIONS.ios.version, buildNumber: AGENT_VERSIONS.ios.buildNumber },
     }
   });
 });
@@ -650,6 +659,10 @@ app.get('/api/agent/version/macos', (_req: Request, res: Response) => {
 
 app.get('/api/agent/version/windows', (_req: Request, res: Response) => {
   res.json(AGENT_VERSIONS.windows);
+});
+
+app.get('/api/agent/version/ios', (_req: Request, res: Response) => {
+  res.json(AGENT_VERSIONS.ios);
 });
 
 // Agent download endpoint - redirects to platform-specific downloads
@@ -666,6 +679,14 @@ app.get('/agent/download/macos', (_req: Request, res: Response) => {
 // Windows agent download - redirects to GitHub release
 app.get('/agent/download/windows', (_req: Request, res: Response) => {
   res.redirect('https://github.com/jersilb1400/MDM-Server/releases/download/v1.1.1/GraceFMAgent-Windows-v1.0.0.zip');
+});
+
+// iOS agent download - redirects to TestFlight or App Store
+app.get('/agent/download/ios', (_req: Request, res: Response) => {
+  // Update this URL once you publish to TestFlight or App Store
+  // For TestFlight: https://testflight.apple.com/join/[CODE]
+  // For App Store: https://apps.apple.com/app/[APP-ID]
+  res.redirect('https://testflight.apple.com/join/your-testflight-code');
 });
 
 // Agent installation instructions page
