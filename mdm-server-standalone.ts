@@ -658,50 +658,14 @@ app.get('/agent/download', (req: Request, res: Response) => {
   res.redirect(`/agent/download/${platform}`);
 });
 
-// macOS agent download
+// macOS agent download - redirects to GitHub release
 app.get('/agent/download/macos', (_req: Request, res: Response) => {
-  // Note: GitHub repo is private, so direct downloads won't work publicly
-  // Option 1: Make repo public
-  // Option 2: Use a different hosting solution
-  // For now, show instructions
-  const html = '<!DOCTYPE html><html><head><title>Download Grace FM Agent</title>' +
-    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;' +
-    'background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);color:#fff;min-height:100vh;' +
-    'display:flex;align-items:center;justify-content:center;margin:0;padding:20px}' +
-    '.card{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;' +
-    'padding:40px;max-width:500px;text-align:center;border:1px solid rgba(255,255,255,0.2)}' +
-    'h1{margin:0 0 10px;font-size:28px}p{color:#aaa;line-height:1.6}.version{color:#4CAF50;' +
-    'font-weight:bold}.contact{background:#0071e3;color:#fff;padding:12px 24px;border-radius:10px;' +
-    'text-decoration:none;display:inline-block;margin-top:20px}' +
-    '.contact:hover{background:#0077ed}</style></head>' +
-    '<body><div class="card"><h1>🍎 Grace FM Agent</h1>' +
-    '<p class="version">macOS Version 1.1.1</p>' +
-    '<p>The installer is available from your IT administrator.</p>' +
-    '<p>Features:<br>• Universal Binary (Intel + Apple Silicon)<br>• Auto-update support<br>• Scheduled reporting</p>' +
-    '<a href="mailto:it@gracefm.org" class="contact">Contact IT Support</a></div></body></html>';
-  res.type('html').send(html);
+  res.redirect('https://github.com/jersilb1400/MDM-Server/releases/download/v1.1.1/GraceFMAgent-Installer-v1.1.1.dmg');
 });
 
-// Windows agent download
+// Windows agent download - redirects to GitHub release
 app.get('/agent/download/windows', (_req: Request, res: Response) => {
-  const html = '<!DOCTYPE html><html><head><title>Download Grace FM Agent</title>' +
-    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
-    '<style>*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;' +
-    'background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);color:#fff;min-height:100vh;' +
-    'display:flex;align-items:center;justify-content:center;margin:0;padding:20px}' +
-    '.card{background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;' +
-    'padding:40px;max-width:500px;text-align:center;border:1px solid rgba(255,255,255,0.2)}' +
-    'h1{margin:0 0 10px;font-size:28px}p{color:#aaa;line-height:1.6}.version{color:#4CAF50;' +
-    'font-weight:bold}.contact{background:#0071e3;color:#fff;padding:12px 24px;border-radius:10px;' +
-    'text-decoration:none;display:inline-block;margin-top:20px}' +
-    '.contact:hover{background:#0077ed}</style></head>' +
-    '<body><div class="card"><h1>🪟 Grace FM Agent</h1>' +
-    '<p class="version">Windows Version 1.0.0</p>' +
-    '<p>The installer is available from your IT administrator.</p>' +
-    '<p>Features:<br>• Full device reporting<br>• Auto-update support<br>• Scheduled reporting</p>' +
-    '<a href="mailto:it@gracefm.org" class="contact">Contact IT Support</a></div></body></html>';
-  res.type('html').send(html);
+  res.redirect('https://github.com/jersilb1400/MDM-Server/releases/download/v1.1.1/GraceFMAgent-Windows-v1.0.0.zip');
 });
 
 // Agent installation instructions page
