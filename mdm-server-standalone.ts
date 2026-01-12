@@ -602,21 +602,72 @@ app.get('/agent/GraceFMAgent.swift', (_req: Request, res: Response) => {
   res.type('text/plain').send(agentCode);
 });
 
-// Agent version check endpoint (for auto-updates)
-app.get('/api/agent/version', (_req: Request, res: Response) => {
-  res.json({
+// Agent version configuration - UPDATE THESE WHEN RELEASING NEW VERSIONS
+const AGENT_VERSIONS = {
+  macos: {
+    version: '1.1.1',
+    buildNumber: 3,
+    downloadUrl: 'https://mdm.gracefm.org/agent/download/macos',
+    releaseNotes: 'Universal Binary support (Intel + Apple Silicon), crash fixes, improved memory management.',
+    mandatory: false,
+    minOsVersion: '12.0',
+  },
+  windows: {
     version: '1.0.0',
     buildNumber: 1,
-    downloadUrl: 'https://mdm.gracefm.org/agent/download',
-    releaseNotes: 'Initial release with device reporting capabilities.',
+    downloadUrl: 'https://mdm.gracefm.org/agent/download/windows',
+    releaseNotes: 'Initial Windows release with full device reporting.',
     mandatory: false,
+    minOsVersion: '10.0',
+  }
+};
+
+// Agent version check endpoint (for auto-updates)
+app.get('/api/agent/version', (req: Request, res: Response) => {
+  const platform = (req.query.platform as string)?.toLowerCase() || 'macos';
+  const agentInfo = AGENT_VERSIONS[platform as keyof typeof AGENT_VERSIONS] || AGENT_VERSIONS.macos;
+  
+  res.json({
+    platform,
+    version: agentInfo.version,
+    buildNumber: agentInfo.buildNumber,
+    downloadUrl: agentInfo.downloadUrl,
+    releaseNotes: agentInfo.releaseNotes,
+    mandatory: agentInfo.mandatory,
+    minOsVersion: agentInfo.minOsVersion,
+    // Include all platforms for clients that want to know
+    platforms: {
+      macos: { version: AGENT_VERSIONS.macos.version, buildNumber: AGENT_VERSIONS.macos.buildNumber },
+      windows: { version: AGENT_VERSIONS.windows.version, buildNumber: AGENT_VERSIONS.windows.buildNumber },
+    }
   });
 });
 
-// Agent download endpoint
-app.get('/agent/download', (_req: Request, res: Response) => {
-  // Redirect to the latest DMG download
+// Platform-specific version endpoints
+app.get('/api/agent/version/macos', (_req: Request, res: Response) => {
+  res.json(AGENT_VERSIONS.macos);
+});
+
+app.get('/api/agent/version/windows', (_req: Request, res: Response) => {
+  res.json(AGENT_VERSIONS.windows);
+});
+
+// Agent download endpoint - redirects to platform-specific downloads
+app.get('/agent/download', (req: Request, res: Response) => {
+  const platform = (req.query.platform as string)?.toLowerCase() || 'macos';
+  res.redirect(`/agent/download/${platform}`);
+});
+
+// macOS agent download
+app.get('/agent/download/macos', (_req: Request, res: Response) => {
+  // Redirect to GitHub releases for the DMG
   res.redirect('https://github.com/jersilb1400/MDM-Server/releases/latest/download/GraceFMAgent-Installer.dmg');
+});
+
+// Windows agent download  
+app.get('/agent/download/windows', (_req: Request, res: Response) => {
+  // Redirect to GitHub releases for the Windows zip
+  res.redirect('https://github.com/jersilb1400/MDM-Server/releases/latest/download/GraceFMAgent-Windows.zip');
 });
 
 // Agent installation instructions page
