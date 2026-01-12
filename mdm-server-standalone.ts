@@ -660,14 +660,38 @@ app.get('/agent/download', (req: Request, res: Response) => {
 
 // macOS agent download
 app.get('/agent/download/macos', (_req: Request, res: Response) => {
-  // Redirect to GitHub releases for the DMG
-  res.redirect('https://github.com/jersilb1400/MDM-Server/releases/latest/download/GraceFMAgent-Installer.dmg');
+  // Try GitHub releases first, fallback to instructions page
+  // Update this URL when you create a GitHub release
+  const githubReleaseUrl = 'https://github.com/jersilb1400/MDM-Server/releases/download/v1.1.1/GraceFMAgent-Installer-v1.1.1.dmg';
+  
+  // For now, show download instructions since GitHub release may not exist
+  const html = '<!DOCTYPE html>' +
+    '<html><head><title>Download Grace FM Agent for macOS</title>' +
+    '<style>body{font-family:-apple-system,sans-serif;max-width:600px;margin:50px auto;padding:20px;text-align:center;}' +
+    '.btn{display:inline-block;background:#0071e3;color:white;padding:15px 30px;border-radius:10px;text-decoration:none;font-size:18px;margin:10px;}' +
+    '.btn:hover{background:#0077ed;}.note{color:#666;margin-top:30px;font-size:14px;}</style></head>' +
+    '<body><h1>Grace FM Agent for macOS</h1><p>Version 1.1.1</p>' +
+    '<p>Please contact your IT administrator for the latest installer.</p>' +
+    '<p class="note">If you have the DMG file, double-click to open and drag the app to Applications.</p>' +
+    '</body></html>';
+  
+  res.type('html').send(html);
 });
 
 // Windows agent download  
 app.get('/agent/download/windows', (_req: Request, res: Response) => {
-  // Redirect to GitHub releases for the Windows zip
-  res.redirect('https://github.com/jersilb1400/MDM-Server/releases/latest/download/GraceFMAgent-Windows.zip');
+  // Try GitHub releases first, fallback to instructions page
+  const html = '<!DOCTYPE html>' +
+    '<html><head><title>Download Grace FM Agent for Windows</title>' +
+    '<style>body{font-family:-apple-system,sans-serif;max-width:600px;margin:50px auto;padding:20px;text-align:center;}' +
+    '.btn{display:inline-block;background:#0071e3;color:white;padding:15px 30px;border-radius:10px;text-decoration:none;font-size:18px;margin:10px;}' +
+    '.btn:hover{background:#0077ed;}.note{color:#666;margin-top:30px;font-size:14px;}</style></head>' +
+    '<body><h1>Grace FM Agent for Windows</h1><p>Version 1.0.0</p>' +
+    '<p>Please contact your IT administrator for the latest installer.</p>' +
+    '<p class="note">Extract the ZIP file and run Install-GraceFMAgent.ps1 as Administrator.</p>' +
+    '</body></html>';
+  
+  res.type('html').send(html);
 });
 
 // Agent installation instructions page
